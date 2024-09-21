@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { TextField, Button, Typography, Container, Box } from '@mui/material';
 import { register } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 
@@ -14,52 +15,62 @@ function Register() {
     setError('');
     try {
       await register(username, password, email);
-      // Redirect to login page after successful registration
+      console.log('Registration successful');
       navigate('/login');
     } catch (err) {
       setError('Registration failed. Please try again.');
-      console.error(err);
+      console.error('Registration error:', err);
     }
   };
 
   return (
-    <div>
-      <h2>Register</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="username">Username:</label>
-          <input
-            type="text"
-            id="username"
+    <Container maxWidth="xs" className="register-container">
+      <Box className="register-form">
+        <Typography variant="h4" gutterBottom>Register</Typography>
+        {error && <Typography color="error">{error}</Typography>}
+        <form onSubmit={handleSubmit}>
+          <TextField
+            label="Username"
+            fullWidth
+            margin="normal"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
           />
-        </div>
-        <div>
-          <label htmlFor="email">Email:</label>
-          <input
+          <TextField
+            label="Email"
             type="email"
-            id="email"
+            fullWidth
+            margin="normal"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
-        </div>
-        <div>
-          <label htmlFor="password">Password:</label>
-          <input
+          <TextField
+            label="Password"
             type="password"
-            id="password"
+            fullWidth
+            margin="normal"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-        </div>
-        <button type="submit">Register</button>
-      </form>
-    </div>
+          <Button type="submit" variant="contained" color="primary" fullWidth>
+            Register
+          </Button>
+        </form>
+        <Box mt={2}>
+          <Button
+            variant="outlined"
+            color="secondary"
+            fullWidth
+            onClick={() => navigate('/login')}
+          >
+            Back to Login
+          </Button>
+        </Box>
+      </Box>
+    </Container>
   );
 }
 

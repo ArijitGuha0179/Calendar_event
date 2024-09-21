@@ -33,37 +33,39 @@ const Login = ({ onLogin }) => {
   };
 
   return (
-    <Container maxWidth="xs">
-      <Typography variant="h4">Login</Typography>
-      <form onSubmit={handleSubmit}>
-        <TextField
-          label="Username"
-          fullWidth
-          margin="normal"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <TextField
-          label="Password"
-          type="password"
-          fullWidth
-          margin="normal"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <Button type="submit" variant="contained" color="primary" fullWidth>
-          Login
-        </Button>
-      </form>
-      <Box mt={2}>
-        <Button
-          variant="outlined"
-          color="secondary"
-          fullWidth
-          onClick={() => navigate('/register')}
-        >
-          Register
-        </Button>
+    <Container maxWidth="xs" className="login-container">
+      <Box className="login-form">
+        <Typography variant="h4" gutterBottom>Login</Typography>
+        <form onSubmit={handleSubmit}>
+          <TextField
+            label="Username"
+            fullWidth
+            margin="normal"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <TextField
+            label="Password"
+            type="password"
+            fullWidth
+            margin="normal"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <Button type="submit" variant="contained" color="primary" fullWidth>
+            Login
+          </Button>
+        </form>
+        <Box mt={2}>
+          <Button
+            variant="outlined"
+            color="secondary"
+            fullWidth
+            onClick={() => navigate('/register')}
+          >
+            Register
+          </Button>
+        </Box>
       </Box>
     </Container>
   );

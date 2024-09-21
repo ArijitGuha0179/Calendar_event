@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Button } from '@mui/material';
+import { Container, Button, Box, ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
@@ -9,6 +9,23 @@ import EventForm from './components/EventForm';
 import Calendar from './components/Calendar';
 import { getEvents } from './services/api';
 import Register from './components/Register';
+import './App.css';
+
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+    primary: {
+      main: '#90caf9',
+    },
+    secondary: {
+      main: '#f48fb1',
+    },
+    background: {
+      default: '#121212',
+      paper: '#1e1e1e',
+    },
+  },
+});
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') === 'true');
@@ -96,42 +113,55 @@ function App() {
   };
 
   return (
-    <Router>
-      <LocalizationProvider dateAdapter={AdapterDateFns}>
-        <Container>
-          <Routes>
-            <Route path="/login" element={<Login onLogin={handleLogin} />} />
-            <Route path="/register" element={<Register />} />
-            <Route
-              path="/"
-              element={
-                isLoggedIn ? (
-                  <>
-                    <Button onClick={handleLogout}>Logout</Button>
-                    <Button onClick={() => setView('calendar')}>Calendar View</Button>
-                    <Button onClick={() => setView('list')}>List View</Button>
-                    {editingEvent ? (
-                      <EventForm event={editingEvent} onSave={handleSaveEvent} onCancel={handleCancelEdit} />
-                    ) : view === 'calendar' ? (
-                      <Calendar 
-                        events={events}
-                        onSelectEvent={handleEditEvent} 
-                        onSelectSlot={handleSelectSlot}
-                      />
-                    ) : (
-                      <EventList events={events} onEdit={handleEditEvent} />
-                    )}
-                    <Button onClick={handleCreateNewEvent}>Create New Event</Button>
-                  </>
-                ) : (
-                  <Navigate to="/login" replace />
-                )
-              }
-            />
-          </Routes>
-        </Container>
-      </LocalizationProvider>
-    </Router>
+    <ThemeProvider theme={darkTheme}>
+      <CssBaseline />
+      <Router>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <Container className="app-container">
+            <Routes>
+              <Route path="/login" element={<Login onLogin={handleLogin} />} />
+              <Route path="/register" element={<Register />} />
+              <Route
+                path="/"
+                element={
+                  isLoggedIn ? (
+                    <>
+                      <Box className="header">
+                        <Button onClick={handleLogout} variant="outlined" color="secondary">Logout</Button>
+                        <Box className="view-buttons">
+                          <Button onClick={() => setView('calendar')} variant="contained" color="primary">Calendar View</Button>
+                          <Button onClick={() => setView('list')} variant="contained" color="primary">List View</Button>
+                        </Box>
+                      </Box>
+                      {editingEvent ? (
+                        <Box className="event-form">
+                          <EventForm event={editingEvent} onSave={handleSaveEvent} onCancel={handleCancelEdit} />
+                        </Box>
+                      ) : view === 'calendar' ? (
+                        <Box className="calendar-container">
+                          <Calendar 
+                            events={events}
+                            onSelectEvent={handleEditEvent} 
+                            onSelectSlot={handleSelectSlot}
+                          />
+                        </Box>
+                      ) : (
+                        <Box className="event-list">
+                          <EventList events={events} onEdit={handleEditEvent} />
+                        </Box>
+                      )}
+                      <Button onClick={handleCreateNewEvent} variant="contained" color="primary">Create New Event</Button>
+                    </>
+                  ) : (
+                    <Navigate to="/login" replace />
+                  )
+                }
+              />
+            </Routes>
+          </Container>
+        </LocalizationProvider>
+      </Router>
+    </ThemeProvider>
   );
 }
 
