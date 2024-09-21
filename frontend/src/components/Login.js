@@ -1,19 +1,34 @@
 import React, { useState } from 'react';
-import { TextField, Button, Typography, Container } from '@mui/material';
+import { TextField, Button, Typography, Container, Box } from '@mui/material';
 import { login } from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      console.log('Attempting login...');
       const response = await login(username, password);
+      console.log('Login response:', response);
       localStorage.setItem('token', response.data.token);
+      console.log('Token stored in localStorage');
       onLogin();
+      console.log('onLogin callback called');
+      navigate('/'); // Add this line to navigate to the main page after login
     } catch (error) {
       console.error('Login failed:', error);
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        console.error('Error status:', error.response.status);
+      } else if (error.request) {
+        console.error('No response received:', error.request);
+      } else {
+        console.error('Error message:', error.message);
+      }
     }
   };
 
@@ -40,6 +55,16 @@ const Login = ({ onLogin }) => {
           Login
         </Button>
       </form>
+      <Box mt={2}>
+        <Button
+          variant="outlined"
+          color="secondary"
+          fullWidth
+          onClick={() => navigate('/register')}
+        >
+          Register
+        </Button>
+      </Box>
     </Container>
   );
 };

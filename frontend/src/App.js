@@ -2,14 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Container, Button } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Login from './components/Login';
 import EventList from './components/EventList';
 import EventForm from './components/EventForm';
 import Calendar from './components/Calendar';
 import { getEvents } from './services/api';
+import Register from './components/Register';
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') === 'true');
   const [editingEvent, setEditingEvent] = useState(null);
   const [events, setEvents] = useState([]);
   const [view, setView] = useState('calendar'); // 'calendar' or 'list'
@@ -23,8 +25,13 @@ function App() {
   const fetchEvents = async () => {
     try {
       const response = await getEvents();
-      setEvents(response.data);
-      scheduleReminders(response.data);
+      const formattedEvents = response.data.map(event => ({
+        ...event,
+        start: new Date(event.start_time),
+        end: new Date(event.end_time),
+      }));
+      setEvents(formattedEvents);
+      scheduleReminders(formattedEvents);
     } catch (error) {
       console.error('Failed to fetch events:', error);
     }
@@ -58,10 +65,12 @@ function App() {
 
   const handleLogin = () => {
     setIsLoggedIn(true);
+    localStorage.setItem('isLoggedIn', 'true');
   };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('isLoggedIn');
     setIsLoggedIn(false);
   };
 
@@ -86,29 +95,43 @@ function App() {
     setEditingEvent({}); // Pass an empty object, not null or undefined
   };
 
-  if (!isLoggedIn) {
-    return <Login onLogin={handleLogin} />;
-  }
-
   return (
-    <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Container>
-        <Button onClick={handleLogout}>Logout</Button>
-        <Button onClick={() => setView('calendar')}>Calendar View</Button>
-        <Button onClick={() => setView('list')}>List View</Button>
-        {editingEvent ? (
-          <EventForm event={editingEvent} onSave={handleSaveEvent} onCancel={handleCancelEdit} />
-        ) : view === 'calendar' ? (
-          <Calendar 
-            onSelectEvent={handleEditEvent} 
-            onSelectSlot={handleSelectSlot}
-          />
-        ) : (
-          <EventList events={events} onEdit={handleEditEvent} />
-        )}
-        <Button onClick={handleCreateNewEvent}>Create New Event</Button>
-      </Container>
-    </LocalizationProvider>
+    <Router>
+      <LocalizationProvider dateAdapter={AdapterDateFns}>
+        <Container>
+          <Routes>
+            <Route path="/login" element={<Login onLogin={handleLogin} />} />
+            <Route path="/register" element={<Register />} />
+            <Route
+              path="/"
+              element={
+                isLoggedIn ? (
+                  <>
+                    <Button onClick={handleLogout}>Logout</Button>
+                    <Button onClick={() => setView('calendar')}>Calendar View</Button>
+                    <Button onClick={() => setView('list')}>List View</Button>
+                    {editingEvent ? (
+                      <EventForm event={editingEvent} onSave={handleSaveEvent} onCancel={handleCancelEdit} />
+                    ) : view === 'calendar' ? (
+                      <Calendar 
+                        events={events}
+                        onSelectEvent={handleEditEvent} 
+                        onSelectSlot={handleSelectSlot}
+                      />
+                    ) : (
+                      <EventList events={events} onEdit={handleEditEvent} />
+                    )}
+                    <Button onClick={handleCreateNewEvent}>Create New Event</Button>
+                  </>
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+          </Routes>
+        </Container>
+      </LocalizationProvider>
+    </Router>
   );
 }
 
