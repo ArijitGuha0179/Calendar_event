@@ -11,6 +11,7 @@ import { getEvents } from './services/api';
 import Register from './components/Register';
 import './App.css';
 
+// Create a dark theme using Material-UI's createTheme
 const darkTheme = createTheme({
   palette: {
     mode: 'dark',
@@ -28,20 +29,27 @@ const darkTheme = createTheme({
 });
 
 function App() {
+  // State for user authentication
   const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') === 'true');
+  // State for the event being edited
   const [editingEvent, setEditingEvent] = useState(null);
+  // State for all events
   const [events, setEvents] = useState([]);
-  const [view, setView] = useState('calendar'); // 'calendar' or 'list'
+  // State for the current view (calendar or list)
+  const [view, setView] = useState('calendar');
 
+  // Effect hook to fetch events when the user logs in
   useEffect(() => {
     if (isLoggedIn) {
       fetchEvents();
     }
   }, [isLoggedIn]);
 
+  // Function to fetch events from the API
   const fetchEvents = async () => {
     try {
       const response = await getEvents();
+      // Format the events, converting date strings to Date objects
       const formattedEvents = response.data.map(event => ({
         ...event,
         start: new Date(event.start_time),
@@ -54,6 +62,7 @@ function App() {
     }
   };
 
+  // Function to schedule reminders for events
   const scheduleReminders = (events) => {
     events.forEach(event => {
       if (event.reminder) {
@@ -68,6 +77,7 @@ function App() {
     });
   };
 
+  // Function to show a notification
   const showNotification = (title, body) => {
     if (Notification.permission === 'granted') {
       new Notification(title, { body });
@@ -80,36 +90,43 @@ function App() {
     }
   };
 
+  // Function to handle user login
   const handleLogin = () => {
     setIsLoggedIn(true);
     localStorage.setItem('isLoggedIn', 'true');
   };
 
+  // Function to handle user logout
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('isLoggedIn');
     setIsLoggedIn(false);
   };
 
+  // Function to handle editing an event
   const handleEditEvent = (event) => {
     setEditingEvent(event);
   };
 
+  // Function to handle saving an event
   const handleSaveEvent = () => {
     setEditingEvent(null);
     fetchEvents();
   };
 
+  // Function to handle canceling event editing
   const handleCancelEdit = () => {
     setEditingEvent(null);
   };
 
+  // Function to handle selecting a time slot in the calendar
   const handleSelectSlot = ({ start, end }) => {
     setEditingEvent({ start_time: start, end_time: end });
   };
 
+  // Function to handle creating a new event
   const handleCreateNewEvent = () => {
-    setEditingEvent({}); // Pass an empty object, not null or undefined
+    setEditingEvent({}); 
   };
 
   return (
@@ -119,13 +136,17 @@ function App() {
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <Container className="app-container">
             <Routes>
+              {/* Route for login page */}
               <Route path="/login" element={<Login onLogin={handleLogin} />} />
+              {/* Route for registration page */}
               <Route path="/register" element={<Register />} />
+              {/* Main route */}
               <Route
                 path="/"
                 element={
                   isLoggedIn ? (
                     <>
+                      {/* Header with logout button and view selection */}
                       <Box className="header">
                         <Button onClick={handleLogout} variant="outlined" color="secondary">Logout</Button>
                         <Box className="view-buttons">
@@ -133,6 +154,7 @@ function App() {
                           <Button onClick={() => setView('list')} variant="contained" color="primary">List View</Button>
                         </Box>
                       </Box>
+                      {/* Conditional rendering based on editing state and view */}
                       {editingEvent ? (
                         <Box className="event-form">
                           <EventForm event={editingEvent} onSave={handleSaveEvent} onCancel={handleCancelEdit} />
@@ -150,9 +172,11 @@ function App() {
                           <EventList events={events} onEdit={handleEditEvent} />
                         </Box>
                       )}
+                      {/* Button to create a new event */}
                       <Button onClick={handleCreateNewEvent} variant="contained" color="primary">Create New Event</Button>
                     </>
                   ) : (
+                    // Redirect to login if not logged in
                     <Navigate to="/login" replace />
                   )
                 }
