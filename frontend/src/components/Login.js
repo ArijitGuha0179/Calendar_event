@@ -48,7 +48,7 @@ const Login = ({ onLogin }) => {
         // Something happened in setting up the request that triggered an Error
         console.error('Error message:', error.message);
       }
-      // TODO: Add user-facing error message
+      
     }
   };
 
