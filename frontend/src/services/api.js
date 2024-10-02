@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Base URL for the API
-const API_BASE_URL = 'https://calendar-backend-1-whzc.onrender.com';
+const API_BASE_URL = 'http://127.0.0.1:8000/';
 
 // Create an axios instance with the base URL
 const api = axios.create({
@@ -38,15 +38,19 @@ export const register = (username, password, email) =>
   api.post('/api/register/', { username, password, email });
 
 // Function to fetch events from the API
-export const getEvents = async () => {
+export const getEvents = async (startTime, endTime) => {
   console.log('Sending request to fetch events...');
   try {
-    const response = await api.get('/api/events/');
-    console.log('Events response received:', response);
-    return response;
+      const params = {};
+      if (startTime) params.start_time = startTime; // Add start_time to params
+      if (endTime) params.end_time = endTime; // Add end_time to params
+
+      const response = await api.get('/events/', { params });
+      console.log('Events response received:', response.data);
+      return response.data; // Return the event data
   } catch (error) {
-    console.error('Error fetching events:', error);
-    throw error;
+      console.error('Error fetching events:', error);
+      throw error; // Rethrow the error for further handling
   }
 };
 

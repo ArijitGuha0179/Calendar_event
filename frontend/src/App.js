@@ -48,17 +48,24 @@ function App() {
   // Function to fetch events from the API
   const fetchEvents = async () => {
     try {
-      const response = await getEvents();
-      // Format the events, converting date strings to Date objects
-      const formattedEvents = response.data.map(event => ({
-        ...event,
-        start: new Date(event.start_time),
-        end: new Date(event.end_time),
-      }));
-      setEvents(formattedEvents);
-      scheduleReminders(formattedEvents);
+        const response = await getEvents(); // Ensure this function is called with necessary parameters if needed
+        console.log('API Response:', response); // Log the entire response for debugging
+
+        // Check if response is an array
+        if (Array.isArray(response)) {
+            // Format the events, converting date strings to Date objects
+            const formattedEvents = response.map(event => ({
+                ...event,
+                start: new Date(event.start_time),
+                end: new Date(event.end_time),
+            }));
+            setEvents(formattedEvents);
+            scheduleReminders(formattedEvents);
+        } else {
+            console.error('Unexpected response structure:', response);
+        }
     } catch (error) {
-      console.error('Failed to fetch events:', error);
+        console.error('Failed to fetch events:', error);
     }
   };
 
